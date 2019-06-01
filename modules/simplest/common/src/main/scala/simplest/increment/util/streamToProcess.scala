@@ -1,4 +1,4 @@
-package simplest.util
+package simplest.increment.util
 
 import aecor.distributedprocessing.DistributedProcessing.{Process, RunningProcess}
 import cats.effect.Concurrent

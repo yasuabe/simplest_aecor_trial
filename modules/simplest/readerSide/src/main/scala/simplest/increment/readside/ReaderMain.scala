@@ -1,4 +1,4 @@
-package simplest.readside
+package simplest.increment.readside
 
 import cats.syntax.flatMap._
 import cats.syntax.parallel._
@@ -11,9 +11,9 @@ import aecor.data.{ConsumerId, EventTag}
 import aecor.distributedprocessing.DistributedProcessing
 import aecor.distributedprocessing.DistributedProcessing.Process
 import aecor.journal.postgres.PostgresOffsetStore
-import simplest.infra._
-import simplest.readside.impl.IncrementProjection
-import simplest.util.{UsingActorSystem, streamToProcess}
+import simplest.increment.readside.infra.IncrementProjection
+import simplest.increment.infra._
+import simplest.increment.util.{UsingActorSystem, streamToProcess}
 
 import scala.concurrent.duration._
 import scala.io.StdIn

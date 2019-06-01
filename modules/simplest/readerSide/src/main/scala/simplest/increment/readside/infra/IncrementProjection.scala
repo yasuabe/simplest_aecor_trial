@@ -1,16 +1,16 @@
-package simplest.readside.impl
+package simplest.increment.readside.infra
 
 import aecor.data.Folded
 import aecor.data.Folded.syntax._
 import cats.effect.Sync
-import cats.syntax.option._
-import simplest.infra.{IncrementCommittable, IncrementEntityEvent, IncrementKey}
-import simplest.model.{NumberAdded, NumberCreated}
-import simplest.readside.model.{IncrementView, Version}
 import cats.syntax.applicative._
 import cats.syntax.applicativeError._
 import cats.syntax.flatMap._
 import cats.syntax.functor._
+import cats.syntax.option._
+import simplest.increment.infra.{IncrementCommittable, IncrementEntityEvent, IncrementKey}
+import simplest.increment.model.{NumberAdded, NumberCreated}
+import simplest.increment.readside.model.{IncrementView, Version}
 
 import scala.collection.mutable
 
@@ -20,10 +20,10 @@ class IncrementProjection[F[_]](implicit val F: Sync[F]) {
   private def set(view: IncrementView) = F.delay(repo.update(view.id, view))
   private def get(key: IncrementKey)   = F.delay(repo.get(key))
 
-  private def puts(s: String) = F.delay { println(s) }
-  private def illegalState(state: Any, event: Any): Throwable =
-    new IllegalStateException(s"projection failed: state = [$state], event = [$event]")
-
+  private def raiseIllegalState(state: Any, event: Any): F[Option[IncrementView]] = {
+    val t: Throwable = new IllegalStateException(s"projection failed: state = [$state], event = [$event]")
+    t.raiseError[F, Option[IncrementView]]
+  }
   private def applyEvent(v: Option[IncrementView])(e: IncrementEntityEvent)
   : Folded[Option[IncrementView]] = v match {
     case None       => IncrementView(e.entityKey, 1, 0).some.next
@@ -42,7 +42,7 @@ class IncrementProjection[F[_]](implicit val F: Sync[F]) {
     def foldEvent(event: IncrementEntityEvent, state: Option[IncrementView]): F[Option[IncrementView]] = {
       val newVersion = applyEvent(state)(event)
       val next       = (s: Option[IncrementView]) => s.pure[F]
-      val impossible = illegalState(state, event).raiseError[F, Option[IncrementView]]
+      val impossible = raiseIllegalState(state, event)
 
       newVersion.fold(impossible)(next)
     }
@@ -55,7 +55,7 @@ class IncrementProjection[F[_]](implicit val F: Sync[F]) {
         (v0, s0) <- fetchVersionAndState(event)
         _        <- F.whenA(v0 olderThan event)(foldEvent(event, s0) >>= saveIfAny(v0))
         (v1, s1) <- fetchVersionAndState(event)
-        _        <- puts(s"Event: $event, Updated: $v1, $s1")
+        _        <- F.delay { println(s"Event: $event, Updated: $v1, $s1") }
       } yield ()
 
     stream.evalMap { committable =>

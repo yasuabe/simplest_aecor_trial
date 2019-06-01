@@ -1,4 +1,4 @@
-package simplest.readside.model
+package simplest.increment.readside.model
 
 import aecor.data.EntityEvent
 

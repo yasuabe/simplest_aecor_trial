@@ -1,12 +1,12 @@
-package simplest.writerSide
+package simplest.increment.writeside
 
 import cats.effect.ExitCode
 import cats.syntax.functor._
 import doobie.util.transactor.Transactor
 import monix.eval.{Task, TaskApp}
-import simplest.infra._
-import simplest.util.UsingActorSystem
-import simplest.writerSide.infra._
+import simplest.increment.infra.{IncrementKey, PostgresJournal}
+import simplest.increment.util.UsingActorSystem
+import simplest.increment.writeside.infra.IncrementsRuntime
 
 object CreateMain extends TaskApp with UsingActorSystem {
   lazy val transactor: Transactor[Task] = Transactor.fromDriverManager[Task](

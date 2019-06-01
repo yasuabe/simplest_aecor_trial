@@ -1,4 +1,4 @@
-package simplest
+package simplest.increment
 
 import aecor.MonadActionReject
 

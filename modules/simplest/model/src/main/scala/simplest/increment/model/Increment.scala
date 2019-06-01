@@ -1,4 +1,4 @@
-package simplest.model
+package simplest.increment.model
 
 import cats.syntax.flatMap._
 import cats.tagless.autoFunctorK

@@ -1,4 +1,4 @@
-package simplest.model
+package simplest.increment.model
 
 import aecor.data.Folded
 import aecor.data.Folded.syntax._

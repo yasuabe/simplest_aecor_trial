@@ -1,4 +1,4 @@
-package simplest.model
+package simplest.increment.model
 
 sealed trait IncrementRejection
 

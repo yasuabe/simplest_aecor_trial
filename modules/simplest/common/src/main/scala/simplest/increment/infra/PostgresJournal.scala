@@ -1,4 +1,4 @@
-package simplest.infra
+package simplest.increment.infra
 
 import aecor.data._
 import aecor.journal.postgres.PostgresEventJournal
@@ -6,8 +6,8 @@ import aecor.journal.postgres.PostgresEventJournal.Serializer.TypeHint
 import cats.effect.{Async, ContextShift}
 import cats.syntax.either._
 import doobie.util.transactor.Transactor
-import simplest.common.protobuf.msg
-import simplest.model.{IncrementEvent, NumberAdded, NumberCreated}
+import simplest.increment.common.protobuf.msg.{Added, Created}
+import simplest.increment.model.{IncrementEvent, NumberAdded, NumberCreated}
 
 object PostgresJournal {
   val entityName: String = "Increment"
@@ -21,9 +21,10 @@ object PostgresJournal {
       IncrementEventSerializer
     )
   object IncrementEventSerializer extends PostgresEventJournal.Serializer[IncrementEvent] {
+    import simplest.increment.common.protobuf.msg
     def serialize(a: IncrementEvent): (TypeHint, Array[Byte]) = a match {
-      case NumberCreated    => "A" -> msg.Created().toByteArray
-      case NumberAdded(num) => "B" -> msg.Added(num).toByteArray
+      case NumberCreated    => "A" -> Created().toByteArray
+      case NumberAdded(num) => "B" -> Added(num).toByteArray
     }
     def deserialize(typeHint: TypeHint, bytes: Array[Byte]): Either[Throwable, IncrementEvent] =
       Either.catchNonFatal(typeHint match {

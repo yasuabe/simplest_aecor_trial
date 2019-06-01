@@ -1,6 +1,6 @@
-package simplest.readside.model
+package simplest.increment.readside.model
 
-import simplest.infra.IncrementKey
+import simplest.increment.infra.IncrementKey
 
 case class IncrementView(id: IncrementKey, sum: Int, version: Long) {
   def add(num: Int):       IncrementView = copy(sum = sum + num)

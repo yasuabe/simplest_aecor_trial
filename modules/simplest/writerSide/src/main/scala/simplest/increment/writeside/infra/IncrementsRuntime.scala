@@ -1,4 +1,4 @@
-package simplest.writerSide.infra
+package simplest.increment.writeside.infra
 
 import aecor.data.{ActionT, EitherK, EventsourcedBehavior}
 import aecor.runtime.Eventsourced
@@ -10,8 +10,8 @@ import cats.syntax.functor._
 import scodec.Codec
 import boopickle.Default._
 import cats.data.EitherT
-import simplest.model.{Increment, IncrementEvent, IncrementRejection, IncrementState}
-import simplest.infra._
+import simplest.increment.infra.{IncrementJournal, Increments, PostgresJournal}
+import simplest.increment.model.{Increment, IncrementEvent, IncrementRejection, IncrementState}
 
 object IncrementsRuntime {
   implicit val rejectionCodec: Codec[IncrementRejection] =

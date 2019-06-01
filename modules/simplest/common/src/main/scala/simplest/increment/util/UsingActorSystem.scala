@@ -1,4 +1,4 @@
-package simplest.util
+package simplest.increment.util
 
 import akka.actor.ActorSystem
 import cats.effect.{Async, IO, Resource}

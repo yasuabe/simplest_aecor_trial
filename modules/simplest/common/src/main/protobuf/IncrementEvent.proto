@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package simplest.common.protobuf.v1;
-option java_package = "simplest.common.protobuf.msg";
+option java_package = "simplest.increment.common.protobuf.msg";
 option optimize_for = SPEED;
 
 option (scalapb.options) = {
