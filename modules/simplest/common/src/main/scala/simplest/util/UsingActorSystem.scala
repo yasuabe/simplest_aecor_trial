@@ -13,12 +13,3 @@ trait UsingActorSystem {
     sys     <- Resource.make(acquire)(release)
   } yield sys
 }
-//trait UsingActorSystem {
-//  def actorSystem(name: String): Resource[Task, ActorSystem] = for {
-//    //TODO: Resource.liftF(Task.delay(ConfigFactory.load()))
-//    config <- Resource.liftF(Task.delay(ConfigFactory.load()))
-//    system <- Resource.make(Task(ActorSystem(name, config)))(
-//      s => Task(Task.fromFuture(s.terminate())).flatten.void
-//    )
-//  } yield system
-//}
