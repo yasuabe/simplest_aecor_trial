@@ -17,7 +17,7 @@ import scala.collection.mutable
 class IncrementProjection[F[_]](implicit val F: Sync[F]) {
   private val repo = mutable.Map.empty[IncrementKey, IncrementView]
 
-  private def set(view: IncrementView) = F.delay(repo.update(view.numberId, view))
+  private def set(view: IncrementView) = F.delay(repo.update(view.id, view))
   private def get(key: IncrementKey)   = F.delay(repo.get(key))
 
   private def puts(s: String) = F.delay { println(s) }
