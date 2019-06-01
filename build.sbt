@@ -64,20 +64,20 @@ val baseSettings = Seq(
   libraryDependencies ++= baseDependencies,
   scalapbTargets
 )
-lazy val model = (project in file("modules/model"))
+lazy val model = (project in file("modules/simplest/model"))
   .settings(baseSettings)
 
-lazy val common = (project in file("modules/common"))
+lazy val common = (project in file("modules/simplest/common"))
   .settings(baseSettings)
   .aggregate(model)
   .dependsOn(model)
 
-lazy val writerSide = (project in file("modules/writerSide"))
+lazy val writerSide = (project in file("modules/simplest/writerSide"))
   .settings(baseSettings)
   .aggregate(common)
   .dependsOn(common)
 
-lazy val readerSide = (project in file("modules/readerSide"))
+lazy val readerSide = (project in file("modules/simplest/readerSide"))
   .settings(baseSettings)
   .aggregate(common)
   .dependsOn(common)

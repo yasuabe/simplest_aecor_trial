@@ -31,14 +31,16 @@ class PostgresJournal[F[_]: Async: ContextShift] {
       PostgresJournal.tagging,
       IncrementEventSerializer
     )
-  lazy val offsetStore: KeyValueStore[F, TagConsumer, Offset] =
-    PostgresOffsetStore("consumer_offset").mapK(transactor.trans)
+  val offsetStore = PostgresOffsetStore("consumer_offset")
+
+  lazy val offsetStoreCIO: KeyValueStore[F, TagConsumer, Offset] =
+    offsetStore mapK transactor.trans
 
   def createProcesses(
     sink: fs2.Sink[F, Committable[F, IncrementEntityEvent]]
   )(implicit F: Concurrent[F], G: Timer[F]): List[Process[F]] = {
 
-    val queries = journal.queries(100.millis).withOffsetStore(offsetStore)
+    val queries = journal.queries(100.millis).withOffsetStore(offsetStoreCIO)
     def tagStream(tag: EventTag): fs2.Stream[F, Unit] =
       fs2.Stream
         .force(queries.eventsByTag(tag, ConsumerId("ViewProjection")))

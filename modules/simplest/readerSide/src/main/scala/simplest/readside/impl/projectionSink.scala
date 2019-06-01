@@ -14,7 +14,7 @@ object projectionSink {
     new IllegalStateException(s"projection failed: state = [$state], event = [$event]")
 
   def apply[F[_], K, E, S](
-                            projection: IncrementProjection[F, EntityEvent[K, E], S],
+    projection: IncrementProjection[F, EntityEvent[K, E], S]
   )(implicit F: Sync[F]): fs2.Sink[F, Committable[F, EntityEvent[K, E]]] = stream => {
 
     def foldEvent(event: EntityEvent[K, E], state: Option[S]): F[Option[S]] = {
