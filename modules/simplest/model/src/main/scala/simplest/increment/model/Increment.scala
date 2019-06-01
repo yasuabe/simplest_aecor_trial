@@ -19,10 +19,10 @@ object Increment {
 
     def create:      F[Unit] = read flatMap {
       case Some(_) => reject(IncrementAlreadyExists$)
-      case None    => append(NumberCreated)
+      case None    => append(Created)
     }
     def add(d: Int): F[Unit] = read flatMap {
-      case Some(s) => append(NumberAdded(d))
+      case Some(s) => append(Incremented(d))
       case None    => reject(IncrementNotFound$)
     }
   }

@@ -9,7 +9,7 @@ import cats.syntax.flatMap._
 import cats.syntax.functor._
 import cats.syntax.option._
 import simplest.increment.infra.{IncrementCommittable, IncrementEntityEvent, IncrementKey}
-import simplest.increment.model.{NumberAdded, NumberCreated}
+import simplest.increment.model.{Incremented, Created}
 import simplest.increment.readside.model.{IncrementView, Version}
 
 import scala.collection.mutable
@@ -28,8 +28,8 @@ class IncrementProjection[F[_]](implicit val F: Sync[F]) {
   : Folded[Option[IncrementView]] = v match {
     case None       => IncrementView(e.entityKey, 0, 0).some.next
     case Some(view) => e.payload match {
-      case NumberCreated    => impossible
-      case NumberAdded(num) => (view add num).some.next
+      case Created    => impossible
+      case Incremented(num) => (view add num).some.next
     }
   }
   private def saveNewVersion(s: IncrementView, v: Version): F[Unit] = set(s version v)
