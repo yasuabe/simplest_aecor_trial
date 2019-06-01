@@ -26,7 +26,7 @@ class IncrementProjection[F[_]](implicit val F: Sync[F]) {
   }
   private def applyEvent(v: Option[IncrementView])(e: IncrementEntityEvent)
   : Folded[Option[IncrementView]] = v match {
-    case None       => IncrementView(e.entityKey, 1, 0).some.next
+    case None       => IncrementView(e.entityKey, 0, 0).some.next
     case Some(view) => e.payload match {
       case NumberCreated    => impossible
       case NumberAdded(num) => (view add num).some.next

@@ -23,7 +23,7 @@ object AddMain extends TaskApp with UsingActorSystem {
       (for {
         _          <- journal.createTable
         increments <- IncrementsRuntime.increments(actorSys, journal)
-        _          <- increments(IncrementKey(id)).add(100)
+        _          <- increments(IncrementKey(id)).add(1)
       } yield ()) as ExitCode.Success
     }
   }
