@@ -2,15 +2,22 @@ package simplest.readside.impl
 
 import aecor.data.Folded
 import aecor.data.Folded.syntax._
-import cats.Functor
+import cats.effect.Sync
 import cats.syntax.functor._
 import cats.syntax.option._
-import simplest.infra.IncrementEntityEvent
+import simplest.infra.{IncrementEntityEvent, IncrementKey}
 import simplest.model.{NumberAdded, NumberCreated}
-import simplest.readside.model.{IncrementProjection, IncrementView, IncrementViewRepo, Version}
+import simplest.readside.model.{IncrementProjection, IncrementView, Version}
 
-class IncrementProjectionImpl[F[_]: Functor](repo: IncrementViewRepo[F])
+import scala.collection.mutable
+
+class IncrementProjectionImpl[F[_]](implicit val F: Sync[F])
   extends IncrementProjection[F, IncrementEntityEvent, IncrementView] {
+
+  val repo: mutable.Map[IncrementKey, IncrementView] = mutable.Map.empty
+
+  def set(view: IncrementView): F[Unit]                  = F.delay(repo.update(view.numberId, view))
+  def get(key: IncrementKey):   F[Option[IncrementView]] = F.delay(repo.get(key))
 
   def applyEvent(v: Option[IncrementView])(e: IncrementEntityEvent)
   : Folded[Option[IncrementView]] = v match {
@@ -21,10 +28,10 @@ class IncrementProjectionImpl[F[_]: Functor](repo: IncrementViewRepo[F])
     }
   }
   def saveNewVersion(s: IncrementView, v: Version): F[Unit] =
-    repo.set(s version v)
+    set(s version v)
 
   def fetchVersionAndState(event: IncrementEntityEvent): F[(Version, Option[IncrementView])] =
-    repo.get(event.entityKey) map { optView =>
+    get(event.entityKey) map { optView =>
       Version(optView map (_.version)) -> optView
     }
 }

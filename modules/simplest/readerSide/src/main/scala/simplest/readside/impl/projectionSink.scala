@@ -20,19 +20,20 @@ object projectionSink {
     def foldEvent(event: EntityEvent[K, E], state: Option[S]): F[Option[S]] = {
       val newVersion = projection.applyEvent(state)(event)
       val next       = (s: Option[S]) => s.pure[F]
-      def impossible = illegalState(state, event).raiseError[F, Option[S]]
+      val impossible = illegalState(state, event).raiseError[F, Option[S]]
 
-      puts(s"New version [$newVersion]") >> newVersion.fold(impossible)(next)
+      newVersion.fold(impossible)(next)
     }
-    def saveIfAny(v: Version)(s: Option[S]) = s match {
+    def saveIfAny(v: Version)(s: Option[S]): F[Unit] = s match {
       case None        => F.unit
       case Some(state) => projection.saveNewVersion(state, v.next)
     }
     def runProjection(event: EntityEvent[K, E]): F[Unit] =
       for {
-        (v, s) <- projection.fetchVersionAndState(event)
-        _      <- puts(s"Current $v [$s]")
-        _      <- F.whenA(v olderThan event)(foldEvent(event, s) >>= saveIfAny(v))
+        (v0, s0) <- projection.fetchVersionAndState(event)
+        _        <- F.whenA(v0 olderThan event)(foldEvent(event, s0) >>= saveIfAny(v0))
+        (v1, s1) <- projection.fetchVersionAndState(event)
+        _        <- puts(s"Event: $event, Updated: $v1, $s1")
       } yield ()
 
     stream.evalMap { committable =>

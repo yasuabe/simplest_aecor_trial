@@ -11,7 +11,7 @@ import cats.effect.{Async, Concurrent, ContextShift, ExitCode, Timer}
 import doobie.util.transactor.Transactor
 import monix.eval.{Task, TaskApp}
 import simplest.infra._
-import simplest.readside.impl.{IncrementProjectionImpl, IncrementViewRepoImpl, projectionSink}
+import simplest.readside.impl.{IncrementProjectionImpl, projectionSink}
 import simplest.util.{UsingActorSystem, streamToProcess}
 
 import scala.concurrent.duration._
@@ -38,7 +38,7 @@ object ReaderMain extends TaskApp with UsingActorSystem {
     offsetStoreCIO mapK transactor.trans
 
   def processes[F[_]: Timer: Concurrent: ContextShift](journal: PostgresJournal[F]): List[Process[F]] = {
-    val projection = new IncrementProjectionImpl[F](new IncrementViewRepoImpl[F](journal.transactor)) // TODO ワイヤリング考える
+    val projection = new IncrementProjectionImpl[F] // TODO projectionSink を一体化できないか
     createProcesses(journal.journal, offsetStore(journal.transactor), projectionSink(projection))
   }
 
