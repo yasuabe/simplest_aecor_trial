@@ -1,4 +1,4 @@
-package simplest.increment.model
+package simplest.sum.model
 
 import cats.syntax.flatMap._
 import cats.tagless.autoFunctorK
@@ -7,23 +7,23 @@ import aecor.macros.boopickleWireProtocol
 
 @autoFunctorK(false)
 @boopickleWireProtocol
-trait Increment[F[_]] {
+trait Sum[F[_]] {
   def create: F[Unit]
   def add(d: Int): F[Unit]
 }
 
-object Increment {
-  def apply[F[_]](implicit F: IncrementAction[F]): Increment[F] =
-    new Increment[F] {
+object Sum {
+  def apply[F[_]](implicit F: CounterAction[F]): Sum[F] =
+    new Sum[F] {
     import F._
 
     def create:      F[Unit] = read flatMap {
-      case Some(_) => reject(IncrementAlreadyExists$)
+      case Some(_) => reject(SumAlreadyExists$$)
       case None    => append(Created)
     }
     def add(d: Int): F[Unit] = read flatMap {
-      case Some(s) => append(Incremented(d))
-      case None    => reject(IncrementNotFound$)
+      case Some(s) => append(Added(d))
+      case None    => reject(SumNotFound$$$)
     }
   }
 }

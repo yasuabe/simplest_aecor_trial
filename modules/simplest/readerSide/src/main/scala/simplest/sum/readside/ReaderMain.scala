@@ -1,4 +1,4 @@
-package simplest.increment.readside
+package simplest.sum.readside
 
 import cats.syntax.flatMap._
 import cats.syntax.parallel._
@@ -11,9 +11,9 @@ import aecor.data.{ConsumerId, EventTag}
 import aecor.distributedprocessing.DistributedProcessing
 import aecor.distributedprocessing.DistributedProcessing.Process
 import aecor.journal.postgres.PostgresOffsetStore
-import simplest.increment.readside.infra.IncrementProjection
-import simplest.increment.infra._
-import simplest.increment.util.{UsingActorSystem, streamToProcess}
+import simplest.sum.infra.PostgresJournal
+import simplest.sum.util.{UsingActorSystem, streamToProcess}
+import simplest.sum.readside.infra.SumProjection
 
 import scala.concurrent.duration._
 import scala.io.StdIn
@@ -24,7 +24,7 @@ trait ReaderProgram[F[_]] {
   implicit val X: ContextShift[F]
 
   private val offsetStoreCIO  = PostgresOffsetStore("consumer_offset")
-  private lazy val projection = new IncrementProjection[F]
+  private lazy val projection = new SumProjection[F]
 
   protected def transactor: Transactor[F]
   private def journal                       = PostgresJournal.eventJournal(transactor)
@@ -54,11 +54,11 @@ object ReaderMain extends TaskApp with ReaderProgram[Task] with UsingActorSystem
 
   def transactor: Transactor[Task] = Transactor.fromDriverManager[Task](
     "org.postgresql.Driver",
-    "jdbc:postgresql://127.0.0.1:5432/increment",
+    "jdbc:postgresql://127.0.0.1:5432/sumdb",
     "postgres",
     ""
   )
-  def run(args: List[String]): Task[ExitCode] = actorSystem("increment") use { sys =>
+  def run(args: List[String]): Task[ExitCode] = actorSystem("sum") use { sys =>
     for {
       _          <- prepareTables.parSequence
       killSwitch <- DistributedProcessing(sys).start("ViewProjectionProcessing", processes)

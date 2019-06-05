@@ -1,10 +1,10 @@
-package simplest.increment.util
+package simplest.sum.util
 
-import aecor.distributedprocessing.DistributedProcessing.{Process, RunningProcess}
 import cats.effect.Concurrent
 import cats.syntax.flatMap._
 import cats.syntax.functor._
 import fs2.concurrent.SignallingRef
+import aecor.distributedprocessing.DistributedProcessing.{Process, RunningProcess}
 
 object streamToProcess {
   def apply[F[_]](stream: fs2.Stream[F, Unit])(implicit F: Concurrent[F]): Process[F] =

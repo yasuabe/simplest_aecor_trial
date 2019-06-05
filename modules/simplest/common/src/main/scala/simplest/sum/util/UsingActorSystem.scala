@@ -1,9 +1,9 @@
-package simplest.increment.util
+package simplest.sum.util
 
-import akka.actor.ActorSystem
-import cats.effect.{Async, IO, Resource}
-import com.typesafe.config.ConfigFactory
 import cats.syntax.functor._
+import cats.effect.{Async, IO, Resource}
+import akka.actor.ActorSystem
+import com.typesafe.config.ConfigFactory
 
 trait UsingActorSystem {
   def actorSystem[F[_]](name: String)(implicit F: Async[F]): Resource[F, ActorSystem] = for {
