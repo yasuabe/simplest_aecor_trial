@@ -1,8 +1,8 @@
-package simplest.sum.util
+package simplest.sum.infra
 
-import cats.syntax.functor._
-import cats.effect.{Async, IO, Resource}
 import akka.actor.ActorSystem
+import cats.effect.{Async, IO, Resource}
+import cats.syntax.functor._
 import com.typesafe.config.ConfigFactory
 
 trait UsingActorSystem {

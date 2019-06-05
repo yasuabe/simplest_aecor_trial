@@ -11,27 +11,27 @@ import aecor.data.{ConsumerId, EventTag}
 import aecor.distributedprocessing.DistributedProcessing
 import aecor.distributedprocessing.DistributedProcessing.Process
 import aecor.journal.postgres.PostgresOffsetStore
-import simplest.sum.infra.PostgresJournal
-import simplest.sum.util.{UsingActorSystem, streamToProcess}
+import simplest.sum.infra.{PostgresJournal, UsingActorSystem}
+import simplest.sum.util.streamToProcess
 import simplest.sum.readside.infra.SumProjection
 
 import scala.concurrent.duration._
 import scala.io.StdIn
 
 trait ReaderProgram[F[_]] {
+  import PostgresJournal._
+
   implicit val F: Concurrent[F]
   implicit val T: Timer[F]
   implicit val X: ContextShift[F]
 
   private val offsetStoreCIO  = PostgresOffsetStore("consumer_offset")
-  private lazy val projection = new SumProjection[F]
+  private lazy val projection = new SumProjection
 
-  protected def transactor: Transactor[F]
-  private def journal                       = PostgresJournal.eventJournal(transactor)
   private def offsetStore(t: Transactor[F]) = offsetStoreCIO mapK t.trans
 
   def processes: List[Process[F]] = {
-    val queries = journal.queries(100.millis).withOffsetStore(offsetStore(transactor))
+    val queries = eventJournal.queries(100.millis).withOffsetStore(offsetStore(transactor))
 
     def tagStream(tag: EventTag): fs2.Stream[F, Unit] = {
       val eventStream = queries.eventsByTag(tag, ConsumerId("ViewProjection"))
@@ -40,10 +40,10 @@ trait ReaderProgram[F[_]] {
         .map(_.map { case (_, event) => event })
         .through(projection.sink)
     }
-    PostgresJournal.tagging.tags.map(t => streamToProcess(tagStream(t)))
+    tagging.tags.map(t => streamToProcess(tagStream(t)))
   }
   def prepareTables: List[F[Unit]] = List(
-    journal.createTable,
+    eventJournal.createTable,
     offsetStoreCIO.createTable.transact(transactor)
   )
 }
@@ -52,12 +52,6 @@ object ReaderMain extends TaskApp with ReaderProgram[Task] with UsingActorSystem
   lazy val T: Timer[Task]        = implicitly[Timer[Task]]
   lazy val X: ContextShift[Task] = implicitly[ContextShift[Task]]
 
-  def transactor: Transactor[Task] = Transactor.fromDriverManager[Task](
-    "org.postgresql.Driver",
-    "jdbc:postgresql://127.0.0.1:5432/sumdb",
-    "postgres",
-    ""
-  )
   def run(args: List[String]): Task[ExitCode] = actorSystem("sum") use { sys =>
     for {
       _          <- prepareTables.parSequence

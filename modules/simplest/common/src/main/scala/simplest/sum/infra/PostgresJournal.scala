@@ -12,7 +12,13 @@ object PostgresJournal {
   val entityName: String = "Sum"
   val tagging: Tagging[SumKey] = Tagging.partitioned(20)(EventTag(entityName))
 
-  def eventJournal[F[_]: Async: ContextShift](transactor: Transactor[F]): SumJournal[F] =
+  def transactor[F[_]: Async: ContextShift]: Transactor[F] = Transactor.fromDriverManager[F](
+    "org.postgresql.Driver",
+    "jdbc:postgresql://127.0.0.1:5432/sumdb",
+    "postgres",
+    ""
+  )
+  def eventJournal[F[_]: Async: ContextShift]: SumJournal[F] =
     new PostgresEventJournal[F, SumKey, SumEvent](
       transactor,
       "sum_event",
