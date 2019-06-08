@@ -5,13 +5,13 @@ import cats.syntax.functor._
 import cats.effect.Concurrent
 import fs2.concurrent.SignallingRef
 import aecor.distributedprocessing.DistributedProcessing.{Process, RunningProcess}
-import aecor.journal.postgres.PostgresEventJournal
+import aecor.runtime.EventJournal
 import aecor.runtime.Eventsourced.Entities
 import simplest.sum.model.{Sum, SumEvent, SumRejection}
 
 package object infra {
   type Sums[F[_]]       = Entities.Rejectable[SumKey, Sum, F, SumRejection]
-  type SumJournal[F[_]] = PostgresEventJournal[F, SumKey, SumEvent]
+  type SumJournal[F[_]] = EventJournal[F, SumKey, SumEvent]
 
   implicit class Fs2StreamOps[F[_]](val stream: fs2.Stream[F, Unit]) {
     def toProcess(implicit F: Concurrent[F]): Process[F] = {
