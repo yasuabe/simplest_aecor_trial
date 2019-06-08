@@ -1,19 +1,22 @@
 package simplest.sum.writeside
 
+import akka.actor.ActorSystem
 import cats.effect.ExitCode
 import cats.syntax.functor._
 import monix.eval.{Task, TaskApp}
-import simplest.sum.infra.{SumPgJournal, UsesTransactor, UsingActorSystem}
+import simplest.sum.infra.{SumPgJournal, UsesActorSystem, UsesTransactor}
 import simplest.sum.writeside.infra.SumRuntime
 import simplest.sum.model.runtime.SumKey
 
-object ZeroMain extends TaskApp with UsingActorSystem with UsesTransactor[Task] {
-  def run(args: List[String]): Task[ExitCode] = actorSystem("sum") use { s =>
+object ZeroMain extends TaskApp with UsesActorSystem with UsesTransactor[Task] {
+  def program(sys: ActorSystem): Task[Unit] = {
     val journal = SumPgJournal.journal[Task](transactor)
-    (for {
+    for {
       _    <- journal.createTable          // ジャーナルテーブルがなければ作る
-      sums <- SumRuntime.sums(s, journal)
+      sums <- SumRuntime.sums(sys, journal)
       _    <- sums(SumKey.random()).create
-    } yield ()) as ExitCode.Success
+    } yield ()
   }
+  def run(args: List[String]): Task[ExitCode] =
+    actorSystem("sum") use program as ExitCode.Success
 }

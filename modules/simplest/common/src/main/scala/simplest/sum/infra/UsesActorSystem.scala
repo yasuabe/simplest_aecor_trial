@@ -5,7 +5,7 @@ import cats.syntax.functor._
 import com.typesafe.config.ConfigFactory
 import akka.actor.ActorSystem
 
-trait UsingActorSystem {
+trait UsesActorSystem {
   def actorSystem[F[_]](name: String)(implicit F: Async[F]): Resource[F, ActorSystem] = for {
     config  <- Resource.liftF(F.delay(ConfigFactory.load()))
     acquire =  F.delay(ActorSystem(name, config))

@@ -4,7 +4,7 @@ import aecor.MonadActionReject
 import aecor.data.{EitherK, EventsourcedBehavior}
 
 package object domain {
-  type SumAction[F[_]] = MonadActionReject[
+  type SumActionReject[F[_]] = MonadActionReject[
     F,                // F[_]
     Option[SumState], // S
     SumEvent,         // E

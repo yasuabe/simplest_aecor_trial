@@ -11,14 +11,14 @@ import aecor.data.{ConsumerId, EventTag}
 import aecor.distributedprocessing.DistributedProcessing
 import aecor.distributedprocessing.DistributedProcessing.Process
 import aecor.journal.postgres.PostgresOffsetStore
-import simplest.sum.infra.{SumPgJournal, UsingActorSystem}
+import simplest.sum.infra.{SumPgJournal, UsesActorSystem}
 import simplest.sum.infra._
 import simplest.sum.readside.infra.SumProjection
 
 import scala.concurrent.duration._
 import scala.io.StdIn
 
-object ReaderMain extends TaskApp with UsingActorSystem with UsesTransactor[Task] {
+object ReaderMain extends TaskApp with UsesActorSystem with UsesTransactor[Task] {
   private val offsetStoreCIO = PostgresOffsetStore("consumer_offset")
   private lazy val journal   = SumPgJournal.journal[Task](transactor)
 

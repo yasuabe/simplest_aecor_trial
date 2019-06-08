@@ -1,13 +1,13 @@
 package simplest.sum.model.domain
 
-import cats.syntax.flatMap._
-import cats.tagless.autoFunctorK
-import boopickle.Default._
-import aecor.macros.boopickleWireProtocol
-import aecor.data.{ActionT, EventsourcedBehavior, Folded}
 import aecor.data.Folded.syntax._
+import aecor.data.{ActionT, EventsourcedBehavior, Folded}
+import aecor.macros.boopickleWireProtocol
+import boopickle.Default._
 import cats.Monad
 import cats.data.EitherT
+import cats.syntax.flatMap._
+import cats.tagless.autoFunctorK
 
 @autoFunctorK(false)
 @boopickleWireProtocol
@@ -17,7 +17,18 @@ trait Sum[F[_]] {
 }
 
 object Sum {
-  def apply[F[_]](implicit F: SumAction[F]): Sum[F] = new Sum[F] {
+  // F には EitherT[ActionT[G, Option[SumState], SumEvent, ?], SumRejection, ?]のような
+  // 型がくるが、 G が Monad でさえあれば、cats や Aecor が提供する暗黙の型クラスインスタンス群を通じて、
+  // MonadActionReject[
+  //   EitherT[
+  //     ActionT[G, Option[SumState], SumEvent, ?],
+  //     SumRejection,
+  //     ?],
+  //   Option[SumState],
+  //   SumEvent,
+  //   SumRejection]
+  // の暗黙インスタンスが芋づる式に導出される
+  def apply[F[_]](implicit F: SumActionReject[F]): Sum[F] = new Sum[F] {
     import F._
 
     def create:      F[Unit] = read flatMap {
@@ -63,5 +74,4 @@ object sumBehavior {
       update  = (state, event) => state handle event
     )
   }
-
 }
