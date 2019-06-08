@@ -11,7 +11,7 @@ import aecor.data.{ConsumerId, EventTag}
 import aecor.distributedprocessing.DistributedProcessing
 import aecor.distributedprocessing.DistributedProcessing.Process
 import aecor.journal.postgres.PostgresOffsetStore
-import simplest.sum.infra.{PostgresJournal, UsingActorSystem}
+import simplest.sum.infra.{SumPgJournal, UsingActorSystem}
 import simplest.sum.infra._
 import simplest.sum.readside.infra.SumProjection
 
@@ -19,19 +19,19 @@ import scala.concurrent.duration._
 import scala.io.StdIn
 
 trait ReaderProgram[F[_]] {
-  import PostgresJournal._
-
   implicit val F: Concurrent[F]
   implicit val T: Timer[F]
   implicit val X: ContextShift[F]
 
   private val offsetStoreCIO  = PostgresOffsetStore("consumer_offset")
   private lazy val projection = new SumProjection
+  private lazy val journal    = SumPgJournal.eventJournal[F]
+  private lazy val transactor = SumPgJournal.transactor[F]
 
   private def offsetStore(t: Transactor[F]) = offsetStoreCIO mapK t.trans
 
   def processes: List[Process[F]] = {
-    val queries = eventJournal.queries(100.millis).withOffsetStore(offsetStore(transactor))
+    val queries = journal.queries(100.millis).withOffsetStore(offsetStore(transactor))
 
     def tagStream(tag: EventTag): fs2.Stream[F, Unit] = {
       val eventStream = queries.eventsByTag(tag, ConsumerId("ViewProjection"))
@@ -40,10 +40,10 @@ trait ReaderProgram[F[_]] {
         .map(_.map { case (_, event) => event })
         .through(projection.sink)
     }
-    tagging.tags.map(tagStream(_).toProcess)
+    SumPgJournal.tagging.tags.map(tagStream(_).toProcess)
   }
   def prepareTables: List[F[Unit]] = List(
-    eventJournal.createTable,
+    journal.createTable,
     offsetStoreCIO.createTable.transact(transactor)
   )
 }

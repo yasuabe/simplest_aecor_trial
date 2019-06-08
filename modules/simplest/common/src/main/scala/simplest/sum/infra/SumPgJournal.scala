@@ -8,7 +8,7 @@ import aecor.journal.postgres.PostgresEventJournal
 import aecor.journal.postgres.PostgresEventJournal.Serializer.TypeHint
 import simplest.sum.model.{Added, Created, SumEvent}
 
-object PostgresJournal {
+object SumPgJournal {
   val entityName: String = "Sum"
   val tagging: Tagging[SumKey] = Tagging.partitioned(20)(EventTag(entityName))
 
@@ -18,11 +18,11 @@ object PostgresJournal {
     "postgres",
     ""
   )
-  def eventJournal[F[_]: Async: ContextShift]: PostgresEventJournal[F, SumKey, SumEvent] =
+  def eventJournal[F[_]: Async: ContextShift]: SumPgJournal[F] =
     new PostgresEventJournal[F, SumKey, SumEvent](
       transactor,
       "sum_event",
-      PostgresJournal.tagging,
+      SumPgJournal.tagging,
       SumEventSerializer
     )
   object SumEventSerializer extends PostgresEventJournal.Serializer[SumEvent] {
