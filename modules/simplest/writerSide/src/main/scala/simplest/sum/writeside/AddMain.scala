@@ -3,16 +3,16 @@ package simplest.sum.writeside
 import cats.effect.ExitCode
 import cats.syntax.functor._
 import monix.eval.{Task, TaskApp}
-import simplest.sum.infra.{SumPgJournal, UsingActorSystem}
+import simplest.sum.infra.{SumPgJournal, UsesTransactor, UsingActorSystem}
 import simplest.sum.model.runtime.SumKey
 import simplest.sum.writeside.infra.SumRuntime
 
 import scala.util.Try
 
-object AddMain extends TaskApp with UsingActorSystem {
+object AddMain extends TaskApp with UsingActorSystem with UsesTransactor[Task] {
   def run(args: List[String]): Task[ExitCode] = parseArgs(args) match {
     case Some((key, n)) => actorSystem("sum") use { actorSys =>
-      val journal = SumPgJournal.journal[Task]
+      val journal = SumPgJournal.journal[Task](transactor)
       (for {
         _    <- journal.createTable
         sums <- SumRuntime.sums(actorSys, journal)

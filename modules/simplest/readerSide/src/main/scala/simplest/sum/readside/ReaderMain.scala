@@ -18,14 +18,13 @@ import simplest.sum.readside.infra.SumProjection
 import scala.concurrent.duration._
 import scala.io.StdIn
 
-trait ReaderProgram[F[_]] {
+trait ReaderProgram[F[_]] extends UsesTransactor[F] {
   implicit val F: Concurrent[F]
   implicit val T: Timer[F]
   implicit val X: ContextShift[F]
 
-  private val offsetStoreCIO  = PostgresOffsetStore("consumer_offset")
-  private lazy val journal    = SumPgJournal.journal[F]
-  private lazy val transactor = SumPgJournal.transactor[F]
+  private val offsetStoreCIO = PostgresOffsetStore("consumer_offset")
+  private lazy val journal   = SumPgJournal.journal[F](transactor)
 
   private def offsetStore(t: Transactor[F]) = offsetStoreCIO mapK t.trans
 
