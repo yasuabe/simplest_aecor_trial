@@ -24,7 +24,7 @@ trait ReaderProgram[F[_]] {
   implicit val X: ContextShift[F]
 
   private val offsetStoreCIO  = PostgresOffsetStore("consumer_offset")
-  private lazy val journal    = SumPgJournal.eventJournal[F]
+  private lazy val journal    = SumPgJournal.journal[F]
   private lazy val transactor = SumPgJournal.transactor[F]
 
   private def offsetStore(t: Transactor[F]) = offsetStoreCIO mapK t.trans

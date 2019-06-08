@@ -19,7 +19,7 @@ object SumPgJournal {
     "postgres",
     ""
   )
-  def eventJournal[F[_]: Async: ContextShift]: SumPgJournal[F] =
+  def journal[F[_]: Async: ContextShift]: SumPgJournal[F] =
     new PostgresEventJournal[F, SumKey, SumEvent](
       transactor,
       "sum_event",

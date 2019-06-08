@@ -9,7 +9,7 @@ import simplest.sum.model.runtime.SumKey
 
 object ZeroMain extends TaskApp with UsingActorSystem {
   def run(args: List[String]): Task[ExitCode] = actorSystem("sum") use { s =>
-    val journal = SumPgJournal.eventJournal[Task]
+    val journal = SumPgJournal.journal[Task]
     (for {
       _    <- journal.createTable          // ジャーナルテーブルがなければ作る
       sums <- SumRuntime.sums(s, journal)

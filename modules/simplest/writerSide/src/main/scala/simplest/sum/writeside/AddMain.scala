@@ -12,7 +12,7 @@ import scala.util.Try
 object AddMain extends TaskApp with UsingActorSystem {
   def run(args: List[String]): Task[ExitCode] = parseArgs(args) match {
     case Some((key, n)) => actorSystem("sum") use { actorSys =>
-      val journal = SumPgJournal.eventJournal[Task]
+      val journal = SumPgJournal.journal[Task]
       (for {
         _    <- journal.createTable
         sums <- SumRuntime.sums(actorSys, journal)
