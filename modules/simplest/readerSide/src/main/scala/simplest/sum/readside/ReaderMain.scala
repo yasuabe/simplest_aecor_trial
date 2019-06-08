@@ -24,7 +24,6 @@ trait ReaderProgram[F[_]] {
   implicit val X: ContextShift[F]
 
   private val offsetStoreCIO  = PostgresOffsetStore("consumer_offset")
-  private lazy val projection = new SumProjection
   private lazy val journal    = SumPgJournal.eventJournal[F]
   private lazy val transactor = SumPgJournal.transactor[F]
 
@@ -38,7 +37,7 @@ trait ReaderProgram[F[_]] {
       fs2.Stream
         .force(eventStream)
         .map(_.map { case (_, event) => event })
-        .through(projection.sink)
+        .through(SumProjection.sink)
     }
     SumPgJournal.tagging.tags.map(tagStream(_).toProcess)
   }

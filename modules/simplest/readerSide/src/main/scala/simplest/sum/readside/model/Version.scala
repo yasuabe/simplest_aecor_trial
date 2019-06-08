@@ -7,5 +7,5 @@ final case class Version(value: Long) extends AnyVal {
   def olderThan[K, E](e: EntityEvent[K, E]): Boolean = value < e.sequenceNr
 }
 object Version {
-  def apply(value: Option[Long]): Version = Version(value getOrElse 0L)
+  val zero: Version = Version(0)
 }
