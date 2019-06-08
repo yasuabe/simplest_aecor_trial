@@ -4,9 +4,10 @@ import cats.syntax.flatMap._
 import cats.tagless.autoFunctorK
 import boopickle.Default._
 import aecor.macros.boopickleWireProtocol
-import aecor.data.Folded
+import aecor.data.{ActionT, EitherK, EventsourcedBehavior, Folded}
 import aecor.data.Folded.syntax._
-import aecor.MonadActionReject
+import cats.Monad
+import cats.data.EitherT
 
 @autoFunctorK(false)
 @boopickleWireProtocol
@@ -16,8 +17,6 @@ trait Sum[F[_]] {
 }
 
 object Sum {
-  type SumAction[F[_]] = MonadActionReject[F, Option[SumState], SumEvent, SumRejection]
-
   def apply[F[_]](implicit F: SumAction[F]): Sum[F] = new Sum[F] {
     import F._
 
@@ -52,4 +51,22 @@ object SumState {
     case Created  => SumState(1).next
     case Added(_) => impossible
   }
+}
+
+object SumBehavior {
+  def behavior[F[_]: Monad]: EventsourcedBehavior[
+    EitherK[Sum, SumRejection, ?[_]], // M[_[_]]
+    F,                                // F[_]
+    Option[SumState],                 // S
+    SumEvent                          // E
+  ] = {
+    type SumAction[A]      = ActionT[F, Option[SumState], SumEvent, A]
+    type SumOrRejection[B] = EitherT[SumAction, SumRejection, B]
+    EventsourcedBehavior.optionalRejectable(
+      actions = Sum[SumOrRejection],
+      create  = event          => SumState.init(event),
+      update  = (state, event) => state handle event
+    )
+  }
+
 }

@@ -7,13 +7,12 @@ import simplest.sum.infra.{PostgresJournal, SumKey, UsingActorSystem}
 import simplest.sum.writeside.infra.SumRuntime
 
 object ZeroMain extends TaskApp with UsingActorSystem {
-  def run(args: List[String]): Task[ExitCode] =
-    actorSystem("sum") use { s =>
-      val journal = PostgresJournal.eventJournal[Task]
-      (for {
-        _    <- journal.createTable
-        sums <- SumRuntime.sums(s, journal)
-        _    <- sums(SumKey.random()).create
-      } yield ()) as ExitCode.Success
-    }
+  def run(args: List[String]): Task[ExitCode] = actorSystem("sum") use { s =>
+    val journal = PostgresJournal.eventJournal[Task]
+    (for {
+      _    <- journal.createTable          // ジャーナルテーブルがなければ作る
+      sums <- SumRuntime.sums(s, journal)
+      _    <- sums(SumKey.random()).create
+    } yield ()) as ExitCode.Success
+  }
 }

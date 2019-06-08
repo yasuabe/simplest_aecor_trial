@@ -12,7 +12,7 @@ import aecor.distributedprocessing.DistributedProcessing
 import aecor.distributedprocessing.DistributedProcessing.Process
 import aecor.journal.postgres.PostgresOffsetStore
 import simplest.sum.infra.{PostgresJournal, UsingActorSystem}
-import simplest.sum.util.streamToProcess
+import simplest.sum.infra._
 import simplest.sum.readside.infra.SumProjection
 
 import scala.concurrent.duration._
@@ -40,7 +40,7 @@ trait ReaderProgram[F[_]] {
         .map(_.map { case (_, event) => event })
         .through(projection.sink)
     }
-    tagging.tags.map(t => streamToProcess(tagStream(t)))
+    tagging.tags.map(tagStream(_).toProcess)
   }
   def prepareTables: List[F[Unit]] = List(
     eventJournal.createTable,

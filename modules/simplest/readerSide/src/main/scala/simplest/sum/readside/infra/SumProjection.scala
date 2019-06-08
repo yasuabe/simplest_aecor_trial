@@ -8,7 +8,6 @@ import cats.syntax.option._
 import cats.effect.Sync
 import aecor.data.Folded
 import aecor.data.Folded.syntax._
-import simplest.sum.infra.{SumCommittable, SumEntityEvent}
 import simplest.sum.model.{Added, Created}
 import simplest.sum.infra.SumKey
 import simplest.sum.readside.model
@@ -16,7 +15,7 @@ import simplest.sum.readside.model.{SumView, Version}
 
 import scala.collection.mutable
 
-class SumProjection[F[_]](implicit val F: Sync[F]) {
+class SumProjection[F[_]](implicit val F: Sync[F]) { // TODO クラスにする意味がない気がする
   private val repo = mutable.Map.empty[SumKey, SumView]
 
   private def set(view: SumView) = F.delay(repo.update(view.id, view))
@@ -30,7 +29,7 @@ class SumProjection[F[_]](implicit val F: Sync[F]) {
   : Folded[Option[SumView]] = v match {
     case None       => SumView(e.entityKey, 0, 0).some.next
     case Some(view) => e.payload match {
-      case Created          => impossible
+      case Created    => impossible
       case Added(num) => (view add num).some.next
     }
   }
