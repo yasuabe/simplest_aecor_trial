@@ -7,8 +7,9 @@ import boopickle.Default._
 import cats.effect.{ConcurrentEffect, Timer}
 import cats.syntax.functor._
 import scodec.Codec
-import simplest.sum.infra.{SumPgJournal, SumJournal, Sums}
-import simplest.sum.model.{sumBehavior, SumRejection}
+import simplest.sum.infra.SumPgJournal
+import simplest.sum.model.runtime.{SumJournal, Sums}
+import simplest.sum.model.domain.{sumBehavior, SumRejection}
 
 object SumRuntime {
   implicit val rejectionCodec: Codec[SumRejection] =

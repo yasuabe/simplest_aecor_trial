@@ -6,7 +6,8 @@ import doobie.util.transactor.Transactor
 import aecor.data._
 import aecor.journal.postgres.PostgresEventJournal
 import aecor.journal.postgres.PostgresEventJournal.Serializer.TypeHint
-import simplest.sum.model.{Added, Created, SumEvent}
+import simplest.sum.model.domain.{Added, Created, SumEvent}
+import simplest.sum.model.runtime.SumKey
 
 object SumPgJournal {
   val entityName: String = "Sum"

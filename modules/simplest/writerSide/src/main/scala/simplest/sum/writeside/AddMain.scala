@@ -3,7 +3,8 @@ package simplest.sum.writeside
 import cats.effect.ExitCode
 import cats.syntax.functor._
 import monix.eval.{Task, TaskApp}
-import simplest.sum.infra.{SumPgJournal, SumKey, UsingActorSystem}
+import simplest.sum.infra.{SumPgJournal, UsingActorSystem}
+import simplest.sum.model.runtime.SumKey
 import simplest.sum.writeside.infra.SumRuntime
 
 import scala.util.Try

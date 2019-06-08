@@ -1,9 +1,9 @@
-package simplest.sum
+package simplest.sum.model
 
 import aecor.MonadActionReject
 import aecor.data.{EitherK, EventsourcedBehavior}
 
-package object model {
+package object domain {
   type SumAction[F[_]] = MonadActionReject[
     F,                // F[_]
     Option[SumState], // S

@@ -1,4 +1,4 @@
-package simplest.sum.infra
+package simplest.sum.model.runtime
 
 import java.util.UUID
 

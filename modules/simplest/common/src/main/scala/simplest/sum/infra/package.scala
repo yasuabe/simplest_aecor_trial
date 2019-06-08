@@ -1,18 +1,15 @@
 package simplest.sum
 
-import cats.syntax.flatMap._
-import cats.syntax.functor._
-import cats.effect.Concurrent
-import fs2.concurrent.SignallingRef
 import aecor.distributedprocessing.DistributedProcessing.{Process, RunningProcess}
 import aecor.journal.postgres.PostgresEventJournal
-import aecor.runtime.EventJournal
-import aecor.runtime.Eventsourced.Entities
-import simplest.sum.model.{Sum, SumEvent, SumRejection}
+import cats.effect.Concurrent
+import cats.syntax.flatMap._
+import cats.syntax.functor._
+import fs2.concurrent.SignallingRef
+import simplest.sum.model.domain.SumEvent
+import simplest.sum.model.runtime.SumKey
 
 package object infra {
-  type Sums[F[_]]       = Entities.Rejectable[SumKey, Sum, F, SumRejection]
-  type SumJournal[F[_]] = EventJournal[F, SumKey, SumEvent]
   type SumPgJournal[F[_]] = PostgresEventJournal[F, SumKey, SumEvent]
 
   implicit class Fs2StreamOps[F[_]](val stream: fs2.Stream[F, Unit]) {

@@ -8,8 +8,8 @@ import cats.syntax.option._
 import cats.effect.Sync
 import aecor.data.Folded
 import aecor.data.Folded.syntax._
-import simplest.sum.model.{Added, Created}
-import simplest.sum.infra.SumKey
+import simplest.sum.model.domain.{Added, Created}
+import simplest.sum.model.runtime.SumKey
 import simplest.sum.readside.model
 import simplest.sum.readside.model.{SumView, Version}
 

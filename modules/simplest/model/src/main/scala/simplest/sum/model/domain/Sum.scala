@@ -1,10 +1,10 @@
-package simplest.sum.model
+package simplest.sum.model.domain
 
 import cats.syntax.flatMap._
 import cats.tagless.autoFunctorK
 import boopickle.Default._
 import aecor.macros.boopickleWireProtocol
-import aecor.data.{ActionT, EitherK, EventsourcedBehavior, Folded}
+import aecor.data.{ActionT, EventsourcedBehavior, Folded}
 import aecor.data.Folded.syntax._
 import cats.Monad
 import cats.data.EitherT
