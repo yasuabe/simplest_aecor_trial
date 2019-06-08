@@ -53,13 +53,8 @@ object SumState {
   }
 }
 
-object SumBehavior {
-  def behavior[F[_]: Monad]: EventsourcedBehavior[
-    EitherK[Sum, SumRejection, ?[_]], // M[_[_]]
-    F,                                // F[_]
-    Option[SumState],                 // S
-    SumEvent                          // E
-  ] = {
+object sumBehavior {
+  def apply[F[_]: Monad]: SumBehavior[F] = {
     type SumAction[A]      = ActionT[F, Option[SumState], SumEvent, A]
     type SumOrRejection[B] = EitherT[SumAction, SumRejection, B]
     EventsourcedBehavior.optionalRejectable(
